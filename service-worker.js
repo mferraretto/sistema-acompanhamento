@@ -2,11 +2,12 @@
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open('app').then(function(cache) {
-      return cache.addAll([
-        '/',
-        '/index.html',
-        '/manifest.json'
-      ]);
+        return cache.addAll([
+          '/',
+          '/index.html',
+          '/manifest.json',
+          '/app.js'
+        ]);
     })
   );
 });
