@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Acompanhamento de Anúncios</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJHISEca3wibw92Bw6UQCpQuyhtkjAoWE",
+      authDomain: "acompanhamento-anuncios.firebaseapp.com",
+      projectId: "acompanhamento-anuncios",
+      storageBucket: "acompanhamento-anuncios.appspot.com",
+      messagingSenderId: "993424162956",
+      appId: "1:993424162956:web:37bb9a39d8aee076cdfba9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.firestore = db;
+    window.firebaseCollection = collection;
+    window.firebaseAddDoc = addDoc;
+    window.firebaseGetDocs = getDocs;
+    window.firebaseQuery = query;
+    window.firebaseWhere = where;
+    window.firebaseUpdateDoc = updateDoc;
+    window.firebaseDoc = doc;
+  </script>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+  <h1 class="mb-4 text-center">📊 Sistema de Acompanhamento de Anúncios</h1>
+  <ul class="nav nav-tabs" id="tabs">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#cadastro">Cadastro de Anúncio</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#alteracoes">Alterações</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#historico">Histórico</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#evolucao">Evolução</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#relatorio">Relatório</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#dashboard">Comparativo</a></li>
+  </ul>
+  <div class="tab-content pt-3">
+    <!-- Aba Cadastro de Anúncio -->
+    <div class="tab-pane fade show active" id="cadastro">
+      <form id="formCadastro" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Nome do Anúncio</label>
+          <input type="text" class="form-control" id="nomeAnuncio" required />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Link Shopee</label>
+          <input type="url" class="form-control" id="linkShopee" required />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">SKU</label>
+          <input type="text" class="form-control" id="sku" required />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Imagem (URL)</label>
+          <input type="url" class="form-control" id="imagem" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Data do Cadastro</label>
+          <input type="date" class="form-control" id="dataCadastro" required />
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Salvar Anúncio</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Aba Alterações -->
+    <div class="tab-pane fade" id="alteracoes">
+      <form id="formAlteracao" class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Data da Alteração</label>
+          <input type="date" class="form-control" id="dataAlteracao" required />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Campo Alterado</label>
+          <input type="text" class="form-control" id="campoAlterado" required />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Antes</label>
+          <input type="text" class="form-control" id="valorAntes" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Depois</label>
+          <input type="text" class="form-control" id="valorDepois" />
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Motivo da Mudança</label>
+          <textarea class="form-control" id="motivoMudanca"></textarea>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-warning">Registrar Alteração</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Aba Histórico -->
+    <div class="tab-pane fade" id="historico">
+      <h5>Histórico de Alterações</h5>
+      <div id="listaHistorico"></div>
+    </div>
+<!-- Aba Evolução -->
+<div class="tab-pane fade" id="evolucao">
+  <h5 class="mb-3">Evolução do Anúncio</h5>
+<hr />
+<div class="mb-3">
+  <label class="form-label">📥 Importar Planilha da Shopee (.xlsx)</label>
+  <input type="file" class="form-control" id="inputPlanilhaShopee" accept=".xlsx" />
+</div>
+  <form id="formEvolucao" class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Nome do Anúncio</label>
+      <input type="text" class="form-control" id="nomeEvolucao" required />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Data</label>
+      <input type="date" class="form-control" id="dataEvolucao" required />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Mudanças Aplicadas</label>
+      <input type="text" class="form-control" id="mudancas" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Visitantes</label>
+      <input type="number" class="form-control" id="visitantes" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Visualizações</label>
+      <input type="number" class="form-control" id="visualizacoes" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Cliques</label>
+      <input type="number" class="form-control" id="cliques" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Carrinhos</label>
+      <input type="number" class="form-control" id="carrinhos" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Conversão Carrinho (%)</label>
+      <input type="number" step="0.1" class="form-control" id="conversaoCarrinho" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Pedidos</label>
+      <input type="number" class="form-control" id="pedidos" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Conversão Compra (%)</label>
+      <input type="number" step="0.1" class="form-control" id="conversaoCompra" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Vendas (R$)</label>
+      <input type="number" step="0.01" class="form-control" id="vendas" />
+    </div>
+    <div class="col-12">
+      <button type="submit" class="btn btn-success">Salvar Evolução</button>
+    </div>
+  </form>
+  <div class="mt-4">
+    <canvas id="graficoEvolucao" height="100"></canvas>
+  </div>
+</div>
+<!-- Aba Relatório -->
+<div class="tab-pane fade" id="relatorio">
+  <h5 class="mb-3">Exportação de Dados</h5>
+  <button class="btn btn-outline-primary" onclick="exportarCSV()">📁 Exportar CSV</button>
+  <button class="btn btn-outline-danger" onclick="exportarPDF()">📄 Exportar PDF</button>
+</div>
+
+<!-- Aba Dashboard Comparativo -->
+<div class="tab-pane fade" id="dashboard">
+  <h5 class="mb-3">Dashboard Comparativo entre Anúncios</h5>
+  <canvas id="graficoComparativo" height="120"></canvas>
+</div>
+
+</div> <!-- fechamento tab-content -->
+</div> <!-- fechamento container -->
+
+<!-- Scripts principais -->
+<script>
+  // Exemplo de uso com Chart.js – gráfico da evolução
+  const ctxEvolucao = document.getElementById('graficoEvolucao');
+  const graficoEvolucao = new Chart(ctxEvolucao, {
+    type: 'line',
+    data: {
+      labels: ['07/01', '07/02', '07/03'],
+      datasets: [
+        {
+          label: 'Vendas (R$)',
+          data: [250, 400, 180],
+          borderWidth: 2,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  // Comparativo (exemplo)
+  const ctxComparativo = document.getElementById('graficoComparativo');
+  const graficoComparativo = new Chart(ctxComparativo, {
+    type: 'bar',
+    data: {
+      labels: ['Anúncio A', 'Anúncio B'],
+      datasets: [
+        {
+          label: 'Vendas (R$)',
+          data: [850, 920],
+          backgroundColor: ['#0d6efd', '#198754']
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  function exportarCSV() {
+    alert("Exportação CSV ainda não implementada.");
+  }
+
+  function exportarPDF() {
+    alert("Exportação PDF ainda não implementada.");
+  }
+</script>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Importação de planilhas com SheetJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+document.getElementById("inputPlanilhaShopee").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function (event) {
+    const data = new Uint8Array(event.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const json = XLSX.utils.sheet_to_json(sheet);
+
+    json.forEach((linha) => {
+      const nome = linha["Nome do anúncio"] || linha["Anúncio"];
+      const data = linha["Data"] || linha["Data da coleta"];
+      const visualizacoes = parseInt(linha["Visualizações"]) || 0;
+      const cliques = parseInt(linha["Cliques"]) || 0;
+      const vendas = parseFloat(linha["Vendas (R$)"]) || 0;
+      const carrinhos = parseInt(linha["Carrinhos"]) || 0;
+      const pedidos = parseInt(linha["Pedidos"]) || 0;
+
+      console.log({ nome, data, visualizacoes, cliques, vendas, carrinhos, pedidos });
+
+      // Aqui você pode salvar no Firebase com addDoc(...)
+    });
+
+    alert("Planilha importada com sucesso!");
+  };
+
+  reader.readAsArrayBuffer(file);
+});
+</script>
+
+</body>
+</html>
