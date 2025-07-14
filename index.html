@@ -55,6 +55,12 @@
       </div>
       <div id="importPreview" class="table-responsive my-3"></div>
       <button id="saveFirebaseBtn" class="btn btn-primary mb-4">Salvar no Firebase</button>
+  <div class="mb-3">
+        <label class="form-label">📥 Importar Planilha de Pedidos (.xlsx)</label>
+        <input type="file" class="form-control" id="inputPlanilhaPedidos" accept=".xlsx" />
+      </div>
+      <div id="previewPedidos" class="table-responsive my-3"></div>
+      <button id="savePedidosBtn" class="btn btn-secondary mb-4">Salvar Pedidos</button>
   <form id="formCadastro" class="row g-3">
         <div class="col-md-6">
           <label class="form-label">Nome do Anúncio</label>
@@ -297,6 +303,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
  
 <script type="module" src="importShopee.js"></script>
+<script type="module" src="importPedidos.js"></script>
 
 <script type="module" src="app.js"></script>
 
