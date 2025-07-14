@@ -18,25 +18,28 @@ export function initImportShopee() {
     const db = window.firestore;
     const col = window.firebaseCollection(db, 'anuncios');
     
-    for (const rec of records) {
-      const sku = rec.item_sku || rec.sku;
-      if (!sku) continue;
-      
-      const q = window.firebaseQuery(col, window.firebaseWhere('item_sku', '==', sku));
-      const snap = await window.firebaseGetDocs(q);
-      
-      if (snap.empty) {
-        await window.firebaseAddDoc(col, rec);
-      } else {
-        
-        const docRef = window.firebaseDoc(db, 'anuncios', snap.docs[0].id);
-        await window.firebaseUpdateDoc(docRef, rec);
-        console.warn(`SKU ${sku} atualizado`);
+     try {
+      for (const rec of records) {
+        const sku = rec.item_sku || rec.sku;
+        if (!sku) continue;
+
+        const q = window.firebaseQuery(col, window.firebaseWhere('item_sku', '==', sku));
+        const snap = await window.firebaseGetDocs(q);
+
+        if (snap.empty) {
+          await window.firebaseAddDoc(col, rec);
+        } else {
+          const docRef = window.firebaseDoc(db, 'anuncios', snap.docs[0].id);
+          await window.firebaseUpdateDoc(docRef, rec);
+          console.warn(`SKU ${sku} atualizado`);
+        }
       }
+        alert('Dados salvos no Firebase');
+    } catch (err) {
+      console.error('Erro ao salvar no Firebase', err);
+      alert('Não foi possível salvar os dados no Firebase.');
     }
-    
-    alert('Dados salvos no Firebase');
-  });
+      });
   
   function confirmDuplicateUpdate(sku) {
     const pref = localStorage.getItem('importShopee_duplicate_pref');
