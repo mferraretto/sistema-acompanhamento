@@ -50,20 +50,13 @@
     <!-- Aba Cadastro de Anúncio -->
 <div class="tab-pane fade show active" id="cadastro">
       <div class="mb-3">
-       <!-- 📁 Importação múltipla Shopee (basic, media, shipping) -->
-<label class="form-label">📥 Importar Planilhas da Shopee (.xlsx)</label>
-<input type="file" class="form-control" id="inputShopeePlanilhas" accept=".xlsx" multiple />
-<div id="previewShopeePlanilhas" class="mt-3 table-responsive"></div>
-<button class="btn btn-success mt-2" id="btnSalvarShopeePlanilhas">Salvar Anúncios</button>
-
-      </div>
-  <!-- 📁 Importação múltipla Shopee (basic, media, shipping) -->
-<div class="mb-3">
-  <label class="form-label">📥 Importar Planilhas da Shopee (.xlsx)</label>
-  <input type="file" class="form-control" id="inputShopeePlanilhas" accept=".xlsx" multiple />
-  <div id="previewShopeePlanilhas" class="mt-3 table-responsive"></div>
-  <button class="btn btn-success mt-2" id="btnSalvarShopeePlanilhas">Salvar Anúncios</button>
-</div>
+     <!-- 📁 Importação de Pedidos -->
+  <div class="mb-3">
+    <label class="form-label">📥 Importar Planilha de Pedidos (.xlsx)</label>
+    <input type="file" class="form-control" id="inputPlanilhaPedidos" accept=".xlsx" multiple />
+    <div id="previewPedidos" class="mt-3 table-responsive"></div>
+    <button class="btn btn-secondary mt-2" id="savePedidosBtn">Salvar Pedidos</button>
+  </div>
   <form id="formCadastro" class="row g-3">
         <div class="col-md-6">
           <label class="form-label">Nome do Anúncio</label>
