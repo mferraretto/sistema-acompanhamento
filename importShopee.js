@@ -4,6 +4,9 @@ export function initImportShopee() {
   const saveBtn = document.getElementById('saveFirebaseBtn');
   let records = [];
 
+   // sempre esquece a preferência ao recarregar a página
+  localStorage.removeItem('importShopee_duplicate_pref');
+
   input.addEventListener('change', async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -29,6 +32,11 @@ export function initImportShopee() {
         if (snap.empty) {
           await window.firebaseAddDoc(col, rec);
         } else {
+          const proceed = await confirmDuplicateUpdate(sku);
+          if (!proceed) {
+            console.warn(`Atualização do SKU ${sku} ignorada`);
+            continue;
+          }
           const docRef = window.firebaseDoc(db, 'anuncios', snap.docs[0].id);
           await window.firebaseUpdateDoc(docRef, rec);
           console.warn(`SKU ${sku} atualizado`);
