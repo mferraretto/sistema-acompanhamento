@@ -56,14 +56,16 @@ function readWorkbook(file) {
 }
 
 function normalizeRow(row) {
-  return {
-    order_id: row.order_id || row['Order ID'] || row.ID || row['ID do pedido'],
+const rec = {
+  order_id: row.order_id || row['Order ID'] || row.ID || row['ID do pedido'],
     buyer: row.buyer || row.Buyer || row.Comprador,
     quantity: row.quantity || row.qty || row.Quantidade,
     price: row.price || row['unit price'] || row.Preço,
     total: row.total || row['Total'] || row['Valor Total'],
     status: row.status || row.Status,
   };
+  Object.keys(rec).forEach(k => rec[k] === undefined && delete rec[k]);
+  return rec;
 }
 
 function renderTable(data, container) {
