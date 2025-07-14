@@ -48,8 +48,14 @@
   </ul>
   <div class="tab-content pt-3">
     <!-- Aba Cadastro de Anúncio -->
-    <div class="tab-pane fade show active" id="cadastro">
-      <form id="formCadastro" class="row g-3">
+<div class="tab-pane fade show active" id="cadastro">
+      <div class="mb-3">
+        <label class="form-label">📥 Importar Planilha da Shopee (.xlsx)</label>
+        <input type="file" class="form-control" id="inputPlanilhaShopee" accept=".xlsx" multiple />
+      </div>
+      <div id="importPreview" class="table-responsive my-3"></div>
+      <button id="saveFirebaseBtn" class="btn btn-primary mb-4">Salvar no Firebase</button>
+  <form id="formCadastro" class="row g-3">
         <div class="col-md-6">
           <label class="form-label">Nome do Anúncio</label>
           <input type="text" class="form-control" id="nomeAnuncio" required />
@@ -114,12 +120,6 @@
 <div class="tab-pane fade" id="evolucao">
   <h5 class="mb-3">Evolução do Anúncio</h5>
 <hr />
-<div class="mb-3">
-  <label class="form-label">📥 Importar Planilha da Shopee (.xlsx)</label>
-  <input type="file" class="form-control" id="inputPlanilhaShopee" accept=".xlsx" multiple />
-</div>
-  <div id="importPreview" class="table-responsive my-3"></div>
-<button id="saveFirebaseBtn" class="btn btn-primary mb-4">Salvar no Firebase</button>
   <form id="formEvolucao" class="row g-3">
     <div class="col-md-4">
       <label class="form-label">Nome do Anúncio</label>
