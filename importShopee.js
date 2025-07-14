@@ -1,7 +1,7 @@
 export function initImportShopee() {
-  const input = document.getElementById('inputPlanilhaShopee');
-  const preview = document.getElementById('importPreview');
-  const saveBtn = document.getElementById('saveFirebaseBtn');
+const input = document.getElementById('inputShopeePlanilhas');
+  const preview = document.getElementById('previewShopeePlanilhas');
+const saveBtn = document.getElementById('btnSalvarShopeePlanilhas');
   let records = [];
 
    // sempre esquece a preferência ao recarregar a página
