@@ -53,13 +53,36 @@ function readWorkbook(file) {
 
 function mergeBySku(rows) {
   const map = {};
+  const shipKeys = {
+    'package_length(cm)': 'package_length',
+    'package_width(cm)': 'package_width',
+    'package_height(cm)': 'package_height',
+    'package_weight': 'weight',
+    'weight(g)': 'weight',
+    'weight(kg)': 'weight'
+  };
+
   rows.forEach(row => {
     const sku = row.item_sku || row.sku || row.SKU || row['item_sku'];
     if (!sku) return;
-    if (!map[sku]) map[sku] = { item_sku: sku };
-    Object.keys(row).forEach(k => {
-      if (row[k] !== undefined && row[k] !== null && row[k] !== '') {
-        map[sku][k] = row[k];
+  if (!map[sku]) map[sku] = { item_sku: sku, basic: {}, media: {}, shipping: {} };
+
+    Object.entries(row).forEach(([k, v]) => {
+      if (v === undefined || v === null || v === '') return;
+
+      if (shipKeys[k]) {
+        const key = shipKeys[k];
+        map[sku].shipping[key] = v;
+        map[sku][key] = v; // flatten for preview
+      } else if (k === 'logistics_channels_enabled') {
+        map[sku].shipping.logistics_channels_enabled = v;
+        map[sku].logistics_channels_enabled = v;
+      } else if (k === 'image' || k === 'images' || k === 'video') {
+        map[sku].media[k] = v;
+        map[sku][k] = v;
+      } else {
+        map[sku].basic[k] = v;
+        map[sku][k] = v;
       }
     });
   });
@@ -89,10 +112,10 @@ function renderTable(data, container) {
     const imgSrc = rec.image || rec.images;
     const desc = rec.description || '';
     const price = rec.price || rec.preco || '';
-    const length = rec.package_length || rec.length || '';
-    const width = rec.package_width || rec.width || '';
-    const height = rec.package_height || rec.height || '';
-    const weight = rec.package_weight || rec.weight || '';
+    const length = rec.package_length || rec.length || rec.shipping?.package_length || '';
+    const width = rec.package_width || rec.width || rec.shipping?.package_width || '';
+    const height = rec.package_height || rec.height || rec.shipping?.package_height || '';
+    const weight = rec.weight || rec.package_weight || rec.shipping?.weight || '';
     const status = rec.status || '';
     const cells = [
       sku,
