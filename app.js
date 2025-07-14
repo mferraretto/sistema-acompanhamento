@@ -14,16 +14,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const anunciosCol = collection(db, 'anuncios');
 
   async function atualizarHistorico() {
-    const snapshot = await getDocs(alteracoesCol);
-    const lista = document.getElementById('listaHistorico');
-    lista.innerHTML = '';
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      const div = document.createElement('div');
-      div.className = 'border rounded p-2 mb-2';
-      div.textContent = `${data.dataAlteracao} - ${data.campoAlterado}: ${data.valorAntes} → ${data.valorDepois}`;
-      lista.appendChild(div);
-    });
+    try {
+      const snapshot = await getDocs(alteracoesCol);
+      const lista = document.getElementById('listaHistorico');
+      lista.innerHTML = '';
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement('div');
+        div.className = 'border rounded p-2 mb-2';
+        div.textContent = `${data.dataAlteracao} - ${data.campoAlterado}: ${data.valorAntes} → ${data.valorDepois}`;
+        lista.appendChild(div);
+      });
+    } catch (err) {
+      console.error('Erro ao carregar histórico', err);
+      alert('Não foi possível carregar o histórico.');
+    }
   }
 
   document.getElementById('formCadastro').addEventListener('submit', async (e) => {
@@ -35,8 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
       imagem: document.getElementById('imagem').value,
       dataCadastro: document.getElementById('dataCadastro').value
     };
-    await addDoc(cadastrosCol, payload);
-    e.target.reset();
+  try {
+      await addDoc(cadastrosCol, payload);
+      e.target.reset();
+    } catch (err) {
+      console.error('Erro ao salvar anúncio', err);
+      alert('Não foi possível salvar o anúncio.');
+    }
   });
 
   document.getElementById('formAlteracao').addEventListener('submit', async (e) => {
@@ -48,9 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
       valorDepois: document.getElementById('valorDepois').value,
       motivoMudanca: document.getElementById('motivoMudanca').value
     };
-    await addDoc(alteracoesCol, payload);
-    e.target.reset();
-    atualizarHistorico();
+   try {
+      await addDoc(alteracoesCol, payload);
+      e.target.reset();
+      atualizarHistorico();
+    } catch (err) {
+      console.error('Erro ao registrar alteração', err);
+      alert('Não foi possível registrar a alteração.');
+    }
   });
 
   document.getElementById('formEvolucao').addEventListener('submit', async (e) => {
@@ -68,30 +83,40 @@ document.addEventListener('DOMContentLoaded', () => {
       conversaoCompra: parseFloat(document.getElementById('conversaoCompra').value) || 0,
       vendas: parseFloat(document.getElementById('vendas').value) || 0
     };
-    await addDoc(evolucoesCol, payload);
-    e.target.reset();
+   try {
+      await addDoc(evolucoesCol, payload);
+      e.target.reset();
+    } catch (err) {
+      console.error('Erro ao registrar evolução', err);
+      alert('Não foi possível registrar a evolução.');
+    }
   });
- async function carregarAnuncios() {
-    const snapshot = await getDocs(anunciosCol);
-    const tbody = document.getElementById('tabelaAnunciosBody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${data.item_sku || data.sku || ''}</td>` +
-        `<td>${data.item_name || data.nome || ''}</td>` +
-        `<td>${data.price || ''}</td>` +
-        `<td>${data.status || ''}</td>`;
-      const tdAcoes = document.createElement('td');
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-sm btn-secondary';
-      btn.textContent = 'Editar';
-      btn.addEventListener('click', () => abrirModalEdicao(docSnap.id, data));
-      tdAcoes.appendChild(btn);
-      tr.appendChild(tdAcoes);
-      tbody.appendChild(tr);
-    });
+async function carregarAnuncios() {
+    try {
+      const snapshot = await getDocs(anunciosCol);
+      const tbody = document.getElementById('tabelaAnunciosBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${data.item_sku || data.sku || ''}</td>` +
+          `<td>${data.item_name || data.nome || ''}</td>` +
+          `<td>${data.price || ''}</td>` +
+          `<td>${data.status || ''}</td>`;
+        const tdAcoes = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-secondary';
+        btn.textContent = 'Editar';
+        btn.addEventListener('click', () => abrirModalEdicao(docSnap.id, data));
+        tdAcoes.appendChild(btn);
+        tr.appendChild(tdAcoes);
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error('Erro ao carregar anúncios', err);
+      alert('Não foi possível carregar os anúncios.');
+    }
   }
 
   function abrirModalEdicao(id, data) {
@@ -112,9 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
       status: document.getElementById('editStatus').value
     };
     const ref = docFn(db, 'anuncios', id);
-    await updateDoc(ref, payload);
-    bootstrap.Modal.getInstance(document.getElementById('modalEditarAnuncio')).hide();
-    carregarAnuncios();
+   try {
+      await updateDoc(ref, payload);
+      bootstrap.Modal.getInstance(document.getElementById('modalEditarAnuncio')).hide();
+      carregarAnuncios();
+    } catch (err) {
+      console.error('Erro ao atualizar anúncio', err);
+      alert('Não foi possível atualizar o anúncio.');
+    }
   });
 
   carregarAnuncios();
