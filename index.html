@@ -115,8 +115,10 @@
 <hr />
 <div class="mb-3">
   <label class="form-label">📥 Importar Planilha da Shopee (.xlsx)</label>
-  <input type="file" class="form-control" id="inputPlanilhaShopee" accept=".xlsx" />
+  <input type="file" class="form-control" id="inputPlanilhaShopee" accept=".xlsx" multiple />
 </div>
+  <div id="importPreview" class="table-responsive my-3"></div>
+<button id="saveFirebaseBtn" class="btn btn-primary mb-4">Salvar no Firebase</button>
   <form id="formEvolucao" class="row g-3">
     <div class="col-md-4">
       <label class="form-label">Nome do Anúncio</label>
@@ -246,39 +248,36 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Importação de planilhas com SheetJS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
+  <script>
 document.getElementById("inputPlanilhaShopee").addEventListener("change", function (e) {
-  const file = e.target.files[0];
-  const reader = new FileReader();
-
+  const files = Array.from(e.target.files || []);
+files.forEach((file) => {
+    const reader = new FileReader();
   reader.onload = function (event) {
-    const data = new Uint8Array(event.target.result);
-    const workbook = XLSX.read(data, { type: "array" });
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(sheet);
+json.forEach((linha) => {
+        const nome = linha["Nome do anúncio"] || linha["Anúncio"];
+        const data = linha["Data"] || linha["Data da coleta"];
+        const visualizacoes = parseInt(linha["Visualizações"]) || 0;
+        const cliques = parseInt(linha["Cliques"]) || 0;
+        const vendas = parseFloat(linha["Vendas (R$)"]) || 0;
+        const carrinhos = parseInt(linha["Carrinhos"]) || 0;
+        const pedidos = parseInt(linha["Pedidos"]) || 0;
+            console.log({ nome, data, visualizacoes, cliques, vendas, carrinhos, pedidos });
+ // Aqui você pode salvar no Firebase com addDoc(...)
+      });
+     alert("Planilha importada com sucesso!");
+    };
 
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-    const json = XLSX.utils.sheet_to_json(sheet);
+    reader.readAsArrayBuffer(file);
+  });
+  });
+<script type="module" src="importShopee.js"></script>
 
-    json.forEach((linha) => {
-      const nome = linha["Nome do anúncio"] || linha["Anúncio"];
-      const data = linha["Data"] || linha["Data da coleta"];
-      const visualizacoes = parseInt(linha["Visualizações"]) || 0;
-      const cliques = parseInt(linha["Cliques"]) || 0;
-      const vendas = parseFloat(linha["Vendas (R$)"]) || 0;
-      const carrinhos = parseInt(linha["Carrinhos"]) || 0;
-      const pedidos = parseInt(linha["Pedidos"]) || 0;
-
-      console.log({ nome, data, visualizacoes, cliques, vendas, carrinhos, pedidos });
-
-      // Aqui você pode salvar no Firebase com addDoc(...)
-    });
-
-    alert("Planilha importada com sucesso!");
-  };
-
-  reader.readAsArrayBuffer(file);
-});
-</script>
 <script type="module" src="app.js"></script>
 
 </body>
