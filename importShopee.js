@@ -1,7 +1,19 @@
 export function initImportShopee() {
 const input = document.getElementById('inputShopeePlanilhas');
+  if (!input) {
+    console.warn('inputShopeePlanilhas element not found');
+    return;
+  }
   const preview = document.getElementById('previewShopeePlanilhas');
-const saveBtn = document.getElementById('btnSalvarShopeePlanilhas');
+if (!preview) {
+    console.warn('previewShopeePlanilhas element not found');
+    return;
+  }
+  const saveBtn = document.getElementById('btnSalvarShopeePlanilhas');
+  if (!saveBtn) {
+    console.warn('btnSalvarShopeePlanilhas element not found');
+    return;
+  }
   let records = [];
 
    // sempre esquece a preferência ao recarregar a página
