@@ -7,7 +7,8 @@ self.addEventListener('install', function(e) {
           '/index.html',
           '/manifest.json',
 '/app.js',
-          '/importShopee.js'
+          '/importShopee.js',
+          '/importPedidos.js'
         ]);
     })
   );
