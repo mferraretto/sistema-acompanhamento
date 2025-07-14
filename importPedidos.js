@@ -17,10 +17,20 @@ export function initImportPedidos() {
     const db = window.firestore;
     const pedidosCol = window.firebaseCollection(db, 'pedidos');
     try {
-      for (const rec of records) {
+      const skipped = [];
+      for (const [idx, rec] of records.entries()) {
+        if (!rec.order_id) {
+          console.warn(`Registro na posição ${idx + 1} ignorado: order_id ausente`);
+          skipped.push(idx + 1);
+          continue;
+        }
         await window.firebaseAddDoc(pedidosCol, rec);
       }
-      alert('Pedidos salvos no Firebase');
+     let msg = 'Pedidos salvos no Firebase';
+      if (skipped.length) {
+        msg += `\nLinhas ignoradas: ${skipped.join(', ')}`;
+      }
+      alert(msg);
     } catch (err) {
       console.error('Erro ao salvar pedidos', err);
       alert('Não foi possível salvar os pedidos.');
