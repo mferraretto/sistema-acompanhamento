@@ -5,10 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const collection = window.firebaseCollection;
   const addDoc = window.firebaseAddDoc;
   const getDocs = window.firebaseGetDocs;
+ const updateDoc = window.firebaseUpdateDoc;
+  const docFn = window.firebaseDoc;
 
   const cadastrosCol = collection(db, 'cadastros');
   const alteracoesCol = collection(db, 'alteracoes');
   const evolucoesCol = collection(db, 'evolucoes');
+  const anunciosCol = collection(db, 'anuncios');
 
   async function atualizarHistorico() {
     const snapshot = await getDocs(alteracoesCol);
@@ -68,6 +71,52 @@ document.addEventListener('DOMContentLoaded', () => {
     await addDoc(evolucoesCol, payload);
     e.target.reset();
   });
+ async function carregarAnuncios() {
+    const snapshot = await getDocs(anunciosCol);
+    const tbody = document.getElementById('tabelaAnunciosBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${data.item_sku || data.sku || ''}</td>` +
+        `<td>${data.item_name || data.nome || ''}</td>` +
+        `<td>${data.price || ''}</td>` +
+        `<td>${data.status || ''}</td>`;
+      const tdAcoes = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-sm btn-secondary';
+      btn.textContent = 'Editar';
+      btn.addEventListener('click', () => abrirModalEdicao(docSnap.id, data));
+      tdAcoes.appendChild(btn);
+      tr.appendChild(tdAcoes);
+      tbody.appendChild(tr);
+    });
+  }
 
+  function abrirModalEdicao(id, data) {
+    document.getElementById('editDocId').value = id;
+    document.getElementById('editNome').value = data.item_name || data.nome || '';
+    document.getElementById('editPreco').value = data.price || '';
+    document.getElementById('editStatus').value = data.status || '';
+    const modal = new bootstrap.Modal(document.getElementById('modalEditarAnuncio'));
+    modal.show();
+  }
+
+  document.getElementById('formEditAnuncio').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editDocId').value;
+    const payload = {
+      item_name: document.getElementById('editNome').value,
+      price: parseFloat(document.getElementById('editPreco').value) || null,
+      status: document.getElementById('editStatus').value
+    };
+    const ref = docFn(db, 'anuncios', id);
+    await updateDoc(ref, payload);
+    bootstrap.Modal.getInstance(document.getElementById('modalEditarAnuncio')).hide();
+    carregarAnuncios();
+  });
+
+  carregarAnuncios();
   atualizarHistorico();
 });
