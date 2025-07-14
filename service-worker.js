@@ -6,7 +6,8 @@ self.addEventListener('install', function(e) {
           '/',
           '/index.html',
           '/manifest.json',
-          '/app.js'
+'/app.js',
+          '/importShopee.js'
         ]);
     })
   );
